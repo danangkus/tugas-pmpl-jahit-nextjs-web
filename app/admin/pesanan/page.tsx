@@ -76,6 +76,7 @@ export default function PesananPage() {
               </Button>
             </DropdownTrigger>
             <DropdownMenu>
+              <DropdownItem>Lihat</DropdownItem>
               <DropdownItem>Ubah Data</DropdownItem>
               <DropdownItem onPress={() => openTahapModal(r.id)}>
                 Ubah Tahap
@@ -136,7 +137,7 @@ export default function PesananPage() {
       onOpen();
       setTahapForm({
         tahap: json.hasil.tahap,
-        penerima_tugas: json.hasil.penerima_tugas,
+        penerima_tugas: json.hasil.penerima_tugas.toString(),
         id,
       });
     }
@@ -238,7 +239,7 @@ export default function PesananPage() {
                   label="Penerima Tugas"
                   labelPlacement="outside"
                   isRequired
-                  value={tahapForm.penerima_tugas}
+                  selectedKeys={[tahapForm.penerima_tugas]}
                   onChange={(e) =>
                     setTahapForm({
                       ...tahapForm,

@@ -20,7 +20,11 @@ const columns = [
       return result;
     },
   },
-  { key: "tanggal_lahir", label: "Tanggal Lahir" },
+  {
+    key: "tanggal_lahir",
+    label: "Tanggal Lahir",
+    render: (v: string) => v && (v as string).split("T")[0],
+  },
   { key: "alamat", label: "Alamat" },
   { key: "tindakan", label: "Tindakan" },
 ];

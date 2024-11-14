@@ -76,6 +76,12 @@ export const DataTable: FC<DataTableProps> = ({
     },
   });
 
+  function onClickUbah(id: number) {
+    const params = new URLSearchParams();
+    params.set("id", id.toString());
+    router.push(`${pathname}/ubah?${params.toString()}`);
+  }
+
   const filteredItems = useMemo(() => {
     let filtered = [...list.items];
 
@@ -135,7 +141,9 @@ export const DataTable: FC<DataTableProps> = ({
               </DropdownTrigger>
               <DropdownMenu>
                 <DropdownItem>Lihat</DropdownItem>
-                <DropdownItem>Ubah</DropdownItem>
+                <DropdownItem onClick={() => onClickUbah(data.id)}>
+                  Ubah
+                </DropdownItem>
                 <DropdownItem color="danger">Hapus</DropdownItem>
               </DropdownMenu>
             </Dropdown>
