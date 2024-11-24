@@ -31,8 +31,11 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from "@nextui-org/dropdown";
+import { ToastContainer } from "react-toastify";
+import { useTheme } from "next-themes";
 
 export const Navbar = () => {
+  const { theme, setTheme } = useTheme();
   const searchInput = (
     <Input
       aria-label="Search"
@@ -179,6 +182,7 @@ export const Navbar = () => {
           ))}
         </div>
       </NavbarMenu>
+      <ToastContainer theme={theme}/>
     </NextUINavbar>
   );
 };

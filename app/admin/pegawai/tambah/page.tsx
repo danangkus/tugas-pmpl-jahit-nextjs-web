@@ -1,16 +1,16 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import PesananForm from "../(component)/form";
+import PegawaiForm from "../(component)/form";
 import { toast } from "react-toastify";
 
-export default function TambahPesananPage() {
+export default function TambahPegawaiPage() {
   const router = useRouter();
 
   async function onSubmit(data: any) {
     let body = data;
 
-    const response = await fetch("http://localhost:3007/pesanan/tambah", {
+    const response = await fetch("http://localhost:3007/pegawai/tambah", {
       method: "POST",
       body: JSON.stringify(body),
       headers: { "Content-Type": "application/json" },
@@ -18,11 +18,11 @@ export default function TambahPesananPage() {
 
     console.log("hasil", response, body);
     if (response.ok) {
-      router.push("/admin/pesanan");
+      router.push("/admin/pegawai");
     } else {
       toast("Error!", { type: "error" });
     }
   }
 
-  return <PesananForm onSubmit={onSubmit} formTitile={"Tambah Pesanan"} />;
+  return <PegawaiForm onSubmit={onSubmit} formTitile={"Tambah Pegawai"} />;
 }

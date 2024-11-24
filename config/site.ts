@@ -1,7 +1,7 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "Next.js + NextUI",
+  name: "Sistem Manajemen Jahit",
   description: "Make beautiful websites regardless of your design experience.",
   navItems: [
     {
@@ -17,8 +17,16 @@ export const siteConfig = {
       href: "/admin/model",
     },
     {
+      label: "Bahan",
+      href: "/admin/bahan",
+    },
+    {
       label: "Pegawai",
       href: "/admin/pegawai",
+    },
+    {
+      label: "Pengguna",
+      href: "/admin/pengguna",
     },
     {
       label: "Aktivitas",

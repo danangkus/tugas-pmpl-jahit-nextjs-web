@@ -2,10 +2,10 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
-import PelangganForm from "../(component)/form";
+import BahanForm from "../(component)/form";
 import { toast } from "react-toastify";
 
-export default function UbahPelangganPage() {
+export default function UbahBahanPage() {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -13,9 +13,8 @@ export default function UbahPelangganPage() {
     const id = params.get("id");
     let body = data;
     body.id = Number(id);
-    body.tanggal_lahir = new Date(body.tanggal_lahir).toISOString();
 
-    const response = await fetch("http://localhost:3007/pelanggan/ubah", {
+    const response = await fetch("http://localhost:3007/bahan/ubah", {
       method: "PUT",
       body: JSON.stringify(body),
       headers: { "Content-Type": "application/json" },
@@ -23,11 +22,11 @@ export default function UbahPelangganPage() {
 
     console.log("hasil", response, body);
     if (response.ok) {
-      router.push("/admin/pelanggan");
+      router.push("/admin/bahan");
     } else {
       toast("Error!", { type: "error" });
     }
   }
 
-  return <PelangganForm onSubmit={onSubmit} formTitile={"Tambah Pelanggan"} />;
+  return <BahanForm onSubmit={onSubmit} formTitile={"Tambah Bahan"} />;
 }

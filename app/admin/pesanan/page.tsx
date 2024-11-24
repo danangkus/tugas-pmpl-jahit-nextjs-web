@@ -22,8 +22,10 @@ import {
 import { ScrollShadow } from "@nextui-org/scroll-shadow";
 import { Select, SelectItem } from "@nextui-org/select";
 import { Tab, Tabs } from "@nextui-org/tabs";
+import { usePathname, useRouter } from "next/navigation";
 import { createRef, useState } from "react";
 import { useAsyncList } from "react-stately";
+import { toast } from "react-toastify";
 
 export default function PesananPage() {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
@@ -40,6 +42,8 @@ export default function PesananPage() {
     penerima_tugas: null,
   });
   const [deleteId, setDeleteId] = useState<number>();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const columns = [
     { key: "id", label: "ID" },
@@ -76,7 +80,9 @@ export default function PesananPage() {
               </Button>
             </DropdownTrigger>
             <DropdownMenu>
-              <DropdownItem>Lihat</DropdownItem>
+              <DropdownItem onPress={() => toLihatPage(r.id)}>
+                Lihat
+              </DropdownItem>
               <DropdownItem>Ubah Data</DropdownItem>
               <DropdownItem onPress={() => openTahapModal(r.id)}>
                 Ubah Tahap
@@ -124,6 +130,12 @@ export default function PesananPage() {
     },
   });
 
+  function toLihatPage(id: number) {
+    const params = new URLSearchParams();
+    params.set("id", id.toString());
+    router.push(`${pathname}/lihat?${params.toString()}`);
+  }
+
   async function openTahapModal(id: number) {
     const response = await fetch(
       "http://localhost:3007/pesanan/ambil?id=" + id,
@@ -140,6 +152,8 @@ export default function PesananPage() {
         penerima_tugas: json.hasil.penerima_tugas.toString(),
         id,
       });
+    } else {
+      toast("Error!", { type: "error" });
     }
   }
 
@@ -162,6 +176,9 @@ export default function PesananPage() {
     if (response.ok) {
       onCloseConfirmDelete();
       tableRef.current?.reload();
+    } else {
+      toast("Error!", { type: "error" });
+      onCloseConfirmDelete();
     }
   }
 
@@ -192,6 +209,8 @@ export default function PesananPage() {
       if (response.ok) {
         onClose();
         tableRef.current?.reload();
+      } else {
+        toast("Error!", { type: "error" });
       }
     }
   }
@@ -204,6 +223,7 @@ export default function PesananPage() {
         endpoint="http://localhost:3007/pesanan/daftar?search="
         searchKey={"pelanggan.nama"}
         tableRef={tableRef}
+        excelExport
       />
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>

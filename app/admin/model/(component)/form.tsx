@@ -1,11 +1,12 @@
 "use client";
 
 import { title } from "@/components/primitives";
-import { genderList } from "@/helpers/valueHelpers";
+import { genderList, getBase64 } from "@/helpers/valueHelpers";
 import { getLocalTimeZone, parseDate, today } from "@internationalized/date";
 import { Button } from "@nextui-org/button";
 import { DateInput } from "@nextui-org/date-input";
 import { DatePicker } from "@nextui-org/date-picker";
+import { Image } from "@nextui-org/image";
 import { Input, Textarea } from "@nextui-org/input";
 import { Select, SelectItem } from "@nextui-org/select";
 import { Formik, useFormik } from "formik";
@@ -18,7 +19,7 @@ const FormSchema = Yup.object().shape({
   nama: Yup.string().required("Required"),
 });
 
-export default function PelangganForm({ onSubmit, formTitle }: any) {
+export default function ModelForm({ onSubmit, formTitle }: any) {
   const params = useSearchParams();
   const {
     handleSubmit,
@@ -31,33 +32,25 @@ export default function PelangganForm({ onSubmit, formTitle }: any) {
   } = useFormik({
     initialValues: {
       nama: "",
-      no_hp: "",
       jenis_kelamin: "",
-      tanggal_lahir: null,
-      alamat: "",
+      deskripsi: "",
     },
     onSubmit: (values) => {
-      onSubmit(values);
+      onSubmit({ ...values, gambar_base64: base64 });
     },
     validationSchema: FormSchema,
   });
+  const [base64, setBase64] = useState<string>();
 
   async function getDetail(id: string) {
-    const response = await fetch(
-      "http://localhost:3007/pelanggan/ambil?id=" + id,
-      {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    const response = await fetch("http://localhost:3007/model/ambil?id=" + id, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
     if (response.ok) {
       let json = await response.json();
-      setValues({
-        ...json.hasil,
-        tanggal_lahir:
-          json.hasil.tanggal_lahir &&
-          parseDate(json.hasil.tanggal_lahir.split("T")[0]),
-      });
+      setValues({ ...json.hasil });
+      setBase64(json.hasil.gambar_base64);
     } else {
       toast("Error!", { type: "error" });
     }
@@ -89,16 +82,6 @@ export default function PelangganForm({ onSubmit, formTitle }: any) {
               errorMessage={errors.nama}
             />
             {/* {errors.nama && touched.nama && errors.nama} */}
-            <Input
-              label="No HP"
-              placeholder="Input No HP"
-              labelPlacement="outside"
-              name="no_hp"
-              onChange={handleChange}
-              value={values.no_hp}
-            />
-          </div>
-          <div className="flex w-full flex-wrap md:flex-nowrap mb-6 md:mb-0 gap-4">
             <Select
               label="Jenis Kelamin"
               placeholder="Pilih Jenis Kelamin"
@@ -111,33 +94,32 @@ export default function PelangganForm({ onSubmit, formTitle }: any) {
                 <SelectItem key={row.key}>{row.label}</SelectItem>
               ))}
             </Select>
-            {/* <DatePicker
-              label="Tanggal Lahir"
-              labelPlacement="outside"
-              maxValue={today(getLocalTimeZone())}
-              name="tanggal_lahir"
-              onChange={handleChange}
-              value={values.tanggal_lahir}
-            /> */}
-            <DateInput
-              label="Tanggal Lahir"
-              labelPlacement="outside"
-              maxValue={today(getLocalTimeZone())}
-              name="tanggal_lahir"
-              onChange={(v) =>
-                handleChange({ target: { name: "tanggal_lahir", value: v } })
-              }
-              value={values.tanggal_lahir}
-            />
           </div>
           <div className="flex w-full flex-wrap md:flex-nowrap mb-6 md:mb-0 gap-4">
+            <div className="flex w-full flex-col gap-1">
+              <label className="">Contoh Gambar</label>
+              <Image src={base64} className="mx-auto max-h-80" />
+              <Input
+                type="file"
+                labelPlacement="outside"
+                // value={dokumenForm.file}
+                onChange={(e) => {
+                  if (e.target.files) {
+                    getBase64(e.target.files[0], (r) => {
+                      setBase64(r);
+                    });
+                  }
+                }}
+              />
+            </div>
             <Textarea
-              label="Alamat"
-              placeholder="Input Alamat"
+              label="Deskripsi"
+              placeholder="Input Deskripsi"
               labelPlacement="outside"
-              name="alamat"
+              name="deskripsi"
               onChange={handleChange}
-              value={values.alamat}
+              value={values.deskripsi}
+              defaultValue=""
             />
           </div>
           <div className="flex justify-end mt-5">

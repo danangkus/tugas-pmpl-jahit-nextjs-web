@@ -17,7 +17,7 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from "@nextui-org/dropdown";
-import { PlusIcon, SearchIcon, VerticalDotsIcon } from "./icons";
+import { DownloadIcon, PlusIcon, SearchIcon, VerticalDotsIcon } from "./icons";
 import { Input } from "@nextui-org/input";
 import { Pagination } from "@nextui-org/pagination";
 import {
@@ -30,12 +30,14 @@ import {
 } from "@nextui-org/table";
 import { useAsyncList } from "react-stately";
 import { usePathname, useRouter } from "next/navigation";
+import * as XLSX from "xlsx";
 
 export interface DataTableProps {
   columns: Record<string, any>[];
   endpoint: string;
   searchKey: string;
   tableRef?: RefObject<DataTableRef>;
+  excelExport?: boolean;
 }
 
 export interface DataTableRef {
@@ -47,6 +49,7 @@ export const DataTable: FC<DataTableProps> = ({
   endpoint,
   searchKey,
   tableRef,
+  excelExport,
 }) => {
   const [filterValue, setFilterValue] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -75,6 +78,21 @@ export const DataTable: FC<DataTableProps> = ({
       };
     },
   });
+
+  const downloadExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(list.items);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    //let buffer = XLSX.write(workbook, { bookType: "xlsx", type: "buffer" });
+    //XLSX.write(workbook, { bookType: "xlsx", type: "binary" });
+    XLSX.writeFile(workbook, "DataSheet.xlsx");
+  };
+
+  function onClickLihat(id: number) {
+    const params = new URLSearchParams();
+    params.set("id", id.toString());
+    router.push(`${pathname}/lihat?${params.toString()}`);
+  }
 
   function onClickUbah(id: number) {
     const params = new URLSearchParams();
@@ -140,7 +158,9 @@ export const DataTable: FC<DataTableProps> = ({
                 </Button>
               </DropdownTrigger>
               <DropdownMenu>
-                <DropdownItem>Lihat</DropdownItem>
+                <DropdownItem onClick={() => onClickLihat(data.id)}>
+                  Lihat
+                </DropdownItem>
                 <DropdownItem onClick={() => onClickUbah(data.id)}>
                   Ubah
                 </DropdownItem>
@@ -190,6 +210,15 @@ export const DataTable: FC<DataTableProps> = ({
             onValueChange={onSearchChange}
           />
           <div className="flex gap-3">
+            {excelExport && (
+              <Button
+                color="success"
+                endContent={<DownloadIcon />}
+                onClick={downloadExcel}
+              >
+                Export Excel
+              </Button>
+            )}
             <Button
               color="primary"
               endContent={<PlusIcon />}

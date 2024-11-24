@@ -8,6 +8,8 @@ import { Providers } from "./providers";
 import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
 import { Navbar } from "@/components/navbar";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export const metadata: Metadata = {
   title: {
