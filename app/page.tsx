@@ -7,6 +7,7 @@ import { Input } from "@nextui-org/input";
 import { Button } from "@nextui-org/button";
 import { FormEvent } from "react";
 import { redirect, useRouter } from "next/navigation";
+import { API_HOST } from "@/helpers/envHelpers";
 
 export default function Home() {
   const router = useRouter();
@@ -16,7 +17,7 @@ export default function Home() {
     const formData = new FormData(event.currentTarget);
     const body: any = Object.fromEntries(formData.entries());
 
-    const response = await fetch("http://localhost:3007/login", {
+    const response = await fetch(API_HOST + "/login", {
       method: "POST",
       body: JSON.stringify(body),
       headers: { "Content-Type": "application/json" },

@@ -13,3 +13,20 @@ export function getBase64(file: File, cb: (b: any) => void) {
     console.log("Error: ", error);
   };
 }
+
+export const toBase64 = (file: Blob) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+  });
+
+export function getGenderDesc(code: string) {
+  let result = code;
+  let filtered = genderList.filter((row) => row.key == code);
+  if (filtered.length > 0) {
+    result = filtered[0].label;
+  }
+  return result;
+}

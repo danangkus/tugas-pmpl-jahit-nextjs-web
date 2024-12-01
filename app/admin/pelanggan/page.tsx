@@ -35,8 +35,9 @@ export default function PelangganPage() {
       <h3 className={title()}>Pelanggan</h3>
       <DataTable
         columns={columns}
-        endpoint="http://localhost:3007/pelanggan/daftar?search="
+        endpoint="/pelanggan"
         searchKey={"nama"}
+        hideDelete
       />
     </div>
   );

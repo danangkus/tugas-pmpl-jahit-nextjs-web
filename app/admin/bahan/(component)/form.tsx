@@ -1,6 +1,7 @@
 "use client";
 
-import { title } from "@/components/primitives";
+import { subtitle, title } from "@/components/primitives";
+import { API_HOST } from "@/helpers/envHelpers";
 import { genderList } from "@/helpers/valueHelpers";
 import { getLocalTimeZone, parseDate, today } from "@internationalized/date";
 import { Button } from "@nextui-org/button";
@@ -74,7 +75,11 @@ export default function BahanForm({ onSubmit, formTitle }: any) {
       deskripsi: "",
     },
     onSubmit: (values) => {
-      onSubmit(values);
+      onSubmit({
+        ...values,
+        stok: values.stok == "" ? null : values.stok,
+        harga: values.harga == "" ? null : values.harga,
+      });
     },
     validationSchema: FormSchema,
   });
@@ -82,7 +87,7 @@ export default function BahanForm({ onSubmit, formTitle }: any) {
   const [historyList, setHistoryList] = useState<any[]>([]);
 
   async function getDetail(id: string) {
-    const response = await fetch("http://localhost:3007/bahan/ambil?id=" + id, {
+    const response = await fetch(API_HOST + "/bahan/ambil?id=" + id, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     });
@@ -107,7 +112,7 @@ export default function BahanForm({ onSubmit, formTitle }: any) {
 
   return (
     <>
-      <h3 className={title()}>{formTitle}</h3>
+      <h3 className={subtitle()}>{formTitle}</h3>
       <form onSubmit={handleSubmit}>
         <div className="flex flex-col gap-4 my-5">
           <div className="flex w-full flex-wrap md:flex-nowrap mb-6 md:mb-0 gap-4">
@@ -194,7 +199,7 @@ export default function BahanForm({ onSubmit, formTitle }: any) {
                   </TableHeader>
                   <TableBody items={historyList}>
                     {(item) => (
-                      <TableRow key={item.key}>
+                      <TableRow key={item.id}>
                         {(columnKey) => (
                           <TableCell>{getKeyValue(item, columnKey)}</TableCell>
                         )}

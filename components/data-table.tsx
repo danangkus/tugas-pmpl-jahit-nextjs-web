@@ -31,6 +31,16 @@ import {
 import { useAsyncList } from "react-stately";
 import { usePathname, useRouter } from "next/navigation";
 import * as XLSX from "xlsx";
+import {
+  Modal,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  useDisclosure,
+} from "@nextui-org/modal";
+import { toast } from "react-toastify";
+import { API_HOST } from "@/helpers/envHelpers";
+import { color } from "framer-motion";
 
 export interface DataTableProps {
   columns: Record<string, any>[];
@@ -38,6 +48,7 @@ export interface DataTableProps {
   searchKey: string;
   tableRef?: RefObject<DataTableRef>;
   excelExport?: boolean;
+  hideDelete?: boolean;
 }
 
 export interface DataTableRef {
@@ -50,6 +61,7 @@ export const DataTable: FC<DataTableProps> = ({
   searchKey,
   tableRef,
   excelExport,
+  hideDelete,
 }) => {
   const [filterValue, setFilterValue] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -57,6 +69,32 @@ export const DataTable: FC<DataTableProps> = ({
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
+  const [deleteId, setDeleteId] = useState<number>();
+  const {
+    isOpen: isOpenConfirmDelete,
+    onOpen: onOpenConfirmDelete,
+    onOpenChange: onOpenChangeConfirmDelete,
+    onClose: onCloseConfirmDelete,
+  } = useDisclosure();
+
+  const fullActions = [
+    {
+      key: "lihat",
+      label: "Lihat",
+      onClick: (id: any) => onClickLihat(id),
+    },
+    {
+      key: "ubah",
+      label: "Ubah",
+      onClick: (id: any) => onClickUbah(id),
+    },
+    {
+      key: "hapus",
+      label: "Hapus",
+      onClick: (id: any) => onClickHapus(id),
+      color: "danger",
+    },
+  ];
 
   const hasSearchFilter = Boolean(filterValue);
   const headerColumns = useMemo(() => {
@@ -65,7 +103,9 @@ export const DataTable: FC<DataTableProps> = ({
 
   const list = useAsyncList({
     async load({ signal, cursor }) {
-      const res = await fetch(cursor || endpoint, { signal });
+      const res = await fetch(cursor || API_HOST + endpoint + "/daftar", {
+        signal,
+      });
       let json = await res.json();
 
       if (!cursor) {
@@ -100,6 +140,33 @@ export const DataTable: FC<DataTableProps> = ({
     router.push(`${pathname}/ubah?${params.toString()}`);
   }
 
+  function onClickHapus(id: number) {
+    setDeleteId(id);
+    onOpenConfirmDelete();
+  }
+
+  async function hapus() {
+    const response = await fetch(
+      API_HOST +
+        endpoint +
+        "/hapus?id=" +
+        deleteId +
+        "&oleh=" +
+        localStorage.getItem("username"),
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    if (response.ok) {
+      onCloseConfirmDelete();
+      list.reload();
+    } else {
+      toast("Error!", { type: "error" });
+      onCloseConfirmDelete();
+    }
+  }
+
   const filteredItems = useMemo(() => {
     let filtered = [...list.items];
 
@@ -130,6 +197,18 @@ export const DataTable: FC<DataTableProps> = ({
     return [...items];
   }, [items]);
 
+  const actionItems = useMemo(() => {
+    let result = fullActions;
+    result = result.filter((row) => {
+      let rRes = true;
+      if (hideDelete == true && row.key == "hapus") {
+        rRes = false;
+      }
+      return rRes;
+    });
+    return result;
+  }, [hideDelete]);
+
   function onTambah() {
     router.push(pathname + "/tambah");
   }
@@ -157,14 +236,17 @@ export const DataTable: FC<DataTableProps> = ({
                   <VerticalDotsIcon className="text-default-300" />
                 </Button>
               </DropdownTrigger>
-              <DropdownMenu>
-                <DropdownItem onClick={() => onClickLihat(data.id)}>
-                  Lihat
-                </DropdownItem>
-                <DropdownItem onClick={() => onClickUbah(data.id)}>
-                  Ubah
-                </DropdownItem>
-                <DropdownItem color="danger">Hapus</DropdownItem>
+              <DropdownMenu items={actionItems}>
+                {(item) => (
+                  <DropdownItem
+                    key={item.key}
+                    color={item.key === "hapus" ? "danger" : "default"}
+                    className={item.key === "hapus" ? "text-danger" : ""}
+                    onClick={() => item.onClick(data.id)}
+                  >
+                    {item.label}
+                  </DropdownItem>
+                )}
               </DropdownMenu>
             </Dropdown>
           </div>
@@ -260,41 +342,70 @@ export const DataTable: FC<DataTableProps> = ({
   }, [items.length, page, pages, hasSearchFilter]);
 
   return (
-    <Table
-      //   isHeaderSticky
-      bottomContent={bottomContent}
-      bottomContentPlacement="outside"
-      //   classNames={{ wrapper: "max-h-[382px]" }}
-      //   selectionMode="multiple"
-      topContent={topContent}
-      topContentPlacement="outside"
-      className="mt-5"
-    >
-      <TableHeader columns={headerColumns}>
-        {(column) => (
-          <TableColumn
-            key={column.uid}
-            align={column.uid === "actions" ? "center" : "start"}
-            allowsSorting={column.sortable}
-          >
-            {column.label}
-          </TableColumn>
-        )}
-      </TableHeader>
-      <TableBody
-        emptyContent={"Tidak ada data"}
-        items={sortedItems}
-        loadingContent="Memuat..."
-        isLoading={loading}
+    <>
+      <Table
+        //   isHeaderSticky
+        bottomContent={bottomContent}
+        bottomContentPlacement="outside"
+        //   classNames={{ wrapper: "max-h-[382px]" }}
+        //   selectionMode="multiple"
+        topContent={topContent}
+        topContentPlacement="outside"
+        className="mt-5"
       >
-        {(item: any) => (
-          <TableRow key={item.id}>
-            {(columnKey) => (
-              <TableCell>{renderCell(item, columnKey)}</TableCell>
-            )}
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+        <TableHeader columns={headerColumns}>
+          {(column) => (
+            <TableColumn
+              key={column.uid}
+              align={column.uid === "actions" ? "center" : "start"}
+              allowsSorting={column.sortable}
+            >
+              {column.label}
+            </TableColumn>
+          )}
+        </TableHeader>
+        <TableBody
+          emptyContent={"Tidak ada data"}
+          items={sortedItems}
+          loadingContent="Memuat..."
+          isLoading={loading}
+        >
+          {(item: any) => (
+            <TableRow key={item.id}>
+              {(columnKey) => (
+                <TableCell>{renderCell(item, columnKey)}</TableCell>
+              )}
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+      <Modal
+        size="xs"
+        isOpen={isOpenConfirmDelete}
+        onOpenChange={onOpenChangeConfirmDelete}
+      >
+        <ModalContent>
+          {(onCloseConfirmDelete) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                Hapus Data?
+              </ModalHeader>
+              <ModalFooter>
+                <Button
+                  color="danger"
+                  variant="light"
+                  onPress={onCloseConfirmDelete}
+                >
+                  Batal
+                </Button>
+                <Button color="primary" onPress={() => hapus()}>
+                  Ya
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+    </>
   );
 };

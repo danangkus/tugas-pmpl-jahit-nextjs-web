@@ -29,8 +29,9 @@ export default function ModelPage() {
       <h3 className={title()}>Jenis/Model Pakaian</h3>
       <DataTable
         columns={columns}
-        endpoint="http://localhost:3007/model/daftar?search="
+        endpoint="/model"
         searchKey={"nama"}
+        hideDelete
       />
     </div>
   );

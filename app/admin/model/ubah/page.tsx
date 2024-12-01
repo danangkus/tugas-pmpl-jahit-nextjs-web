@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import ModelForm from "../(component)/form";
 import { toast } from "react-toastify";
+import { API_HOST } from "@/helpers/envHelpers";
 
 export default function UbahModelPage() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export default function UbahModelPage() {
     let body = data;
     body.id = Number(id);
 
-    const response = await fetch("http://localhost:3007/model/ubah", {
+    const response = await fetch(API_HOST + "/model/ubah", {
       method: "PUT",
       body: JSON.stringify(body),
       headers: { "Content-Type": "application/json" },
@@ -28,5 +29,5 @@ export default function UbahModelPage() {
     }
   }
 
-  return <ModelForm onSubmit={onSubmit} formTitile={"Tambah Model"} />;
+  return <ModelForm onSubmit={onSubmit} formTitle={"Tambah Model"} />;
 }

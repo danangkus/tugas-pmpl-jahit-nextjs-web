@@ -1,6 +1,7 @@
 "use client";
 
-import { title } from "@/components/primitives";
+import { subtitle, title } from "@/components/primitives";
+import { API_HOST } from "@/helpers/envHelpers";
 import { genderList } from "@/helpers/valueHelpers";
 import { getLocalTimeZone, parseDate, today } from "@internationalized/date";
 import { Button } from "@nextui-org/button";
@@ -48,10 +49,9 @@ export default function PenggunaForm({ onSubmit, formTitle }: any) {
 
   const pegawaiList = useAsyncList({
     async load({ signal, cursor }) {
-      const res = await fetch(
-        cursor || "http://localhost:3007/pegawai/daftar?search=",
-        { signal }
-      );
+      const res = await fetch(cursor || API_HOST + "/pegawai/daftar?search=", {
+        signal,
+      });
       let json = await res.json();
 
       return {
@@ -62,13 +62,10 @@ export default function PenggunaForm({ onSubmit, formTitle }: any) {
   });
 
   async function getDetail(id: string) {
-    const response = await fetch(
-      "http://localhost:3007/pengguna/ambil?id=" + id,
-      {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    const response = await fetch(API_HOST + "/pengguna/ambil?id=" + id, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
     if (response.ok) {
       let json = await response.json();
       setValues({
@@ -104,7 +101,7 @@ export default function PenggunaForm({ onSubmit, formTitle }: any) {
 
   return (
     <>
-      <h3 className={title()}>{formTitle}</h3>
+      <h3 className={subtitle()}>{formTitle}</h3>
       <form onSubmit={handleSubmit}>
         <div className="flex flex-col gap-4 my-5">
           <div className="flex w-full flex-wrap md:flex-nowrap mb-6 md:mb-0 gap-4">

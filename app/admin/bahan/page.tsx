@@ -19,8 +19,9 @@ export default function BahanPage() {
       <h3 className={title()}>Bahan</h3>
       <DataTable
         columns={columns}
-        endpoint="http://localhost:3007/bahan/daftar?search="
+        endpoint="/bahan"
         searchKey={"nama"}
+        hideDelete
       />
     </div>
   );

@@ -1,23 +1,91 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import PesananForm from "../(component)/form";
 import { toast } from "react-toastify";
-import { title } from "@/components/primitives";
-import { useEffect, useState } from "react";
+import { subtitle, title } from "@/components/primitives";
+import { Key, useCallback, useEffect, useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
+} from "@nextui-org/table";
+import { DownloadIcon } from "@/components/icons";
+import { Link } from "@nextui-org/link";
+import { API_HOST } from "@/helpers/envHelpers";
+
+const dokumenColumns = [
+  {
+    key: "nama",
+    label: "Nama Dokumen",
+  },
+  {
+    key: "deskripsi",
+    label: "Deskripsi",
+  },
+  {
+    key: "download",
+    label: "Download",
+  },
+];
+
+const bahanColumns = [
+  {
+    key: "nama",
+    label: "Nama Bahan",
+  },
+  {
+    key: "jumlah",
+    label: "Jumlah",
+  },
+  {
+    key: "satuan",
+    label: "Satuan",
+  },
+  {
+    key: "harga",
+    label: "Harga Satuan",
+  },
+  {
+    key: "jumlahHarga",
+    label: "Harga",
+  },
+  {
+    key: "catatan",
+    label: "Catatan",
+  },
+];
+
+const pengukuranColumns = [
+  {
+    key: "nama",
+    label: "Nama Pengukuran",
+  },
+  {
+    key: "nilai",
+    label: "Nilai",
+  },
+  {
+    key: "satuan",
+    label: "Satuan",
+  },
+  {
+    key: "catatan",
+    label: "Catatan",
+  },
+];
 
 export default function LihatPesananPage() {
   const params = useSearchParams();
   const [data, setData] = useState<Record<string, any>>();
 
   async function getDetail(id: string) {
-    const response = await fetch(
-      "http://localhost:3007/pesanan/ambil?id=" + id,
-      {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    const response = await fetch(API_HOST + "/pesanan/ambil?id=" + id, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
     if (response.ok) {
       let json = await response.json();
       setData({ ...json.hasil });
@@ -25,6 +93,51 @@ export default function LihatPesananPage() {
       toast("Error!", { type: "error" });
     }
   }
+
+  const renderCellDokumen = useCallback((data: any, columnKey: Key) => {
+    const cellValue = data[columnKey as keyof typeof data];
+
+    switch (columnKey) {
+      case "download":
+        return (
+          <Link download={data.nama} href={data.base64}>
+            <DownloadIcon />
+          </Link>
+        );
+      default:
+        return cellValue;
+    }
+  }, []);
+
+  const renderCellBahan = useCallback((data: any, columnKey: Key) => {
+    const cellValue = data[columnKey as keyof typeof data];
+
+    switch (columnKey) {
+      case "nama":
+        return data.bahan.nama;
+      case "harga":
+        return "Rp. " + data.bahan.harga;
+      case "satuan":
+        return data.bahan.satuan;
+      case "jumlahHarga":
+        return "Rp. " + parseFloat(data.jumlah) * data.bahan.harga;
+      default:
+        return cellValue;
+    }
+  }, []);
+
+  const renderCellPengukuran = useCallback((data: any, columnKey: Key) => {
+    const cellValue = data[columnKey as keyof typeof data];
+
+    switch (columnKey) {
+      case "nama":
+        return data.pengukuran.nama;
+      case "satuan":
+        return data.pengukuran.satuan;
+      default:
+        return cellValue;
+    }
+  }, []);
 
   useEffect(() => {
     const id = params.get("id");
@@ -36,44 +149,110 @@ export default function LihatPesananPage() {
 
   return (
     <>
-      <h3 className={title()}>Lihat Pesanan</h3>
+      <h3 className={subtitle()}>Lihat Pesanan</h3>
       <table className="my-5">
         <tbody>
           <tr>
             <td>Pelanggan</td>
-            <td>: {data?.pelanggan.nama}</td>
+            <td>: </td>
+            <td>{data?.pelanggan.nama}</td>
           </tr>
           <tr>
             <td>Model Pakaian</td>
-            <td>: {data?.jenis_pakaian.nama}</td>
+            <td>: </td>
+            <td>{data?.jenis_pakaian.nama}</td>
           </tr>
           <tr>
             <td>Tahap Terakhir</td>
-            <td>: {data?.tahap_objek.nama}</td>
+            <td>: </td>
+            <td>{data?.tahap_objek.nama}</td>
           </tr>
           <tr>
             <td>Penanggung Jawab</td>
-            <td>: {data?.pegawai.nama}</td>
+            <td>: </td>
+            <td>{data?.pegawai.nama}</td>
           </tr>
           <tr>
             <td>Target Penyelesaian</td>
-            <td>: {data?.target_tanggal}</td>
+            <td>: </td>
+            <td>{data?.target_tanggal}</td>
           </tr>
           <tr>
             <td>Catatan</td>
-            <td>: {data?.catatan}</td>
+            <td>: </td>
+            <td>{data?.catatan}</td>
           </tr>
           <tr>
             <td>Dokumen</td>
-            {/* <td>: {data?.dokumen}</td> */}
+            <td>:</td>
+            <td>
+              <Table removeWrapper isStriped>
+                <TableHeader columns={dokumenColumns}>
+                  {(column) => (
+                    <TableColumn key={column.key}>{column.label}</TableColumn>
+                  )}
+                </TableHeader>
+                <TableBody items={data?.dokumen ?? []}>
+                  {(item: any) => (
+                    <TableRow key={item.id}>
+                      {(columnKey) => (
+                        <TableCell>
+                          {renderCellDokumen(item, columnKey)}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </td>
           </tr>
           <tr>
             <td>Kebutuhan Bahan</td>
-            {/* <td>: {data?.bahan}</td> */}
+            <td>: </td>
+            <td>
+              <Table removeWrapper isStriped>
+                <TableHeader columns={bahanColumns}>
+                  {(column) => (
+                    <TableColumn key={column.key}>{column.label}</TableColumn>
+                  )}
+                </TableHeader>
+                <TableBody items={data?.bahan ?? []}>
+                  {(item: any) => (
+                    <TableRow key={item.id}>
+                      {(columnKey) => (
+                        <TableCell>
+                          {renderCellBahan(item, columnKey)}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </td>
           </tr>
           <tr>
             <td>Pengukuran</td>
-            {/* <td>: {data?.pengukuran}</td> */}
+            <td>: </td>
+            <td>
+              <Table removeWrapper isStriped>
+                <TableHeader columns={pengukuranColumns}>
+                  {(column) => (
+                    <TableColumn key={column.key}>{column.label}</TableColumn>
+                  )}
+                </TableHeader>
+                <TableBody items={data?.pengukuran ?? []}>
+                  {(item: any) => (
+                    <TableRow key={item.id}>
+                      {(columnKey) => (
+                        <TableCell>
+                          {renderCellPengukuran(item, columnKey)}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </td>
           </tr>
         </tbody>
       </table>

@@ -14,11 +14,7 @@ export default function PenggunaPage() {
   return (
     <div>
       <h3 className={title()}>Pengguna</h3>
-      <DataTable
-        columns={columns}
-        endpoint="http://localhost:3007/pengguna/daftar?search="
-        searchKey={"nama"}
-      />
+      <DataTable columns={columns} endpoint="/pengguna" searchKey={"nama"} />
     </div>
   );
 }

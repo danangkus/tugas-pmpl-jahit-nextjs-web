@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import PesananForm from "../(component)/form";
 import { toast } from "react-toastify";
+import { API_HOST } from "@/helpers/envHelpers";
 
 export default function TambahPesananPage() {
   const router = useRouter();
@@ -10,7 +11,7 @@ export default function TambahPesananPage() {
   async function onSubmit(data: any) {
     let body = data;
 
-    const response = await fetch("http://localhost:3007/pesanan/tambah", {
+    const response = await fetch(API_HOST + "/pesanan/tambah", {
       method: "POST",
       body: JSON.stringify(body),
       headers: { "Content-Type": "application/json" },
@@ -24,5 +25,5 @@ export default function TambahPesananPage() {
     }
   }
 
-  return <PesananForm onSubmit={onSubmit} formTitile={"Tambah Pesanan"} />;
+  return <PesananForm onSubmit={onSubmit} formTitle={"Tambah Pesanan"} />;
 }

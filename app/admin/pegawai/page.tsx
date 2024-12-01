@@ -17,8 +17,9 @@ export default function PegawaiPage() {
       <h3 className={title()}>Pegawai</h3>
       <DataTable
         columns={columns}
-        endpoint="http://localhost:3007/pegawai/daftar?search="
+        endpoint="/pegawai"
         searchKey={"nama"}
+        hideDelete
       />
     </div>
   );

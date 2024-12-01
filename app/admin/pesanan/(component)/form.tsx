@@ -1,7 +1,9 @@
 "use client";
 
 import { DeleteIcon, EyeIcon, PlusIcon } from "@/components/icons";
-import { title } from "@/components/primitives";
+import { subtitle, title } from "@/components/primitives";
+import { API_HOST } from "@/helpers/envHelpers";
+import { toBase64 } from "@/helpers/valueHelpers";
 import { getLocalTimeZone, parseDate, today } from "@internationalized/date";
 import { Button } from "@nextui-org/button";
 import { DateInput } from "@nextui-org/date-input";
@@ -69,10 +71,9 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
 
   const pelangganList = useAsyncList({
     async load({ signal, cursor }) {
-      const res = await fetch(
-        cursor || "http://localhost:3007/pelanggan/daftar?search=",
-        { signal }
-      );
+      const res = await fetch(cursor || API_HOST + "/pelanggan/daftar?search=", {
+        signal,
+      });
       let json = await res.json();
 
       return {
@@ -84,10 +85,9 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
 
   const modelList = useAsyncList({
     async load({ signal, cursor }) {
-      const res = await fetch(
-        cursor || "http://localhost:3007/model/daftar?search=",
-        { signal }
-      );
+      const res = await fetch(cursor || API_HOST + "/model/daftar?search=", {
+        signal,
+      });
       let json = await res.json();
 
       return {
@@ -100,7 +100,7 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
   const pengukuranItemList = useAsyncList({
     async load({ signal, cursor }) {
       const res = await fetch(
-        cursor || "http://localhost:3007/pengukuran/daftar?search=",
+        cursor || API_HOST + "/pengukuran/daftar?search=",
         { signal }
       );
       let json = await res.json();
@@ -111,14 +111,6 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
       };
     },
   });
-
-  const toBase64 = (file: Blob) =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-    });
 
   async function tambahDokumen() {
     if (dokumenForm.file) {
@@ -177,13 +169,10 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
   }
 
   async function getDetail(id: string) {
-    const response = await fetch(
-      "http://localhost:3007/pesanan/ambil?id=" + id,
-      {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    const response = await fetch(API_HOST + "/pesanan/ambil?id=" + id, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
     if (response.ok) {
       let json = await response.json();
       setValues({
@@ -207,7 +196,7 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
 
   return (
     <div>
-      <h3 className={title()}>{formTitle}</h3>
+      <h3 className={subtitle()}>{formTitle}</h3>
       <form onSubmit={handleSubmit}>
         <div className="flex flex-col gap-4 my-5">
           <div className="flex w-full flex-wrap md:flex-nowrap mb-6 md:mb-0 gap-4">

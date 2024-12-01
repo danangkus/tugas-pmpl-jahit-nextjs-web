@@ -21,7 +21,7 @@ export default function AktivitasPage() {
       <h3 className={title()}>Riwayat Aktivitas</h3>
       <DataTable
         columns={columns}
-        endpoint="http://localhost:3007/aktivitas/daftar?search="
+        endpoint="/aktivitas"
         searchKey={"aktivitas"}
       />
     </div>

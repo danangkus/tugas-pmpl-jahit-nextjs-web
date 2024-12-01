@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
 import PelangganForm from "../(component)/form";
 import { toast } from "react-toastify";
+import { API_HOST } from "@/helpers/envHelpers";
 
 export default function UbahPelangganPage() {
   const router = useRouter();
@@ -15,7 +16,7 @@ export default function UbahPelangganPage() {
     body.id = Number(id);
     body.tanggal_lahir = new Date(body.tanggal_lahir).toISOString();
 
-    const response = await fetch("http://localhost:3007/pelanggan/ubah", {
+    const response = await fetch(API_HOST + "/pelanggan/ubah", {
       method: "PUT",
       body: JSON.stringify(body),
       headers: { "Content-Type": "application/json" },
@@ -29,5 +30,5 @@ export default function UbahPelangganPage() {
     }
   }
 
-  return <PelangganForm onSubmit={onSubmit} formTitile={"Tambah Pelanggan"} />;
+  return <PelangganForm onSubmit={onSubmit} formTitle={"Tambah Pelanggan"} />;
 }

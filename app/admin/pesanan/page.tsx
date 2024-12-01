@@ -3,6 +3,7 @@
 import { DataTable, DataTableRef } from "@/components/data-table";
 import { VerticalDotsIcon } from "@/components/icons";
 import { title } from "@/components/primitives";
+import { API_HOST } from "@/helpers/envHelpers";
 import { Button } from "@nextui-org/button";
 import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import {
@@ -102,10 +103,9 @@ export default function PesananPage() {
 
   const tahapList = useAsyncList({
     async load({ signal, cursor }) {
-      const res = await fetch(
-        cursor || "http://localhost:3007/tahap/daftar?search=",
-        { signal }
-      );
+      const res = await fetch(cursor || API_HOST + "/tahap/daftar?search=", {
+        signal,
+      });
       let json = await res.json();
 
       return {
@@ -117,10 +117,9 @@ export default function PesananPage() {
 
   const pegawaiList = useAsyncList({
     async load({ signal, cursor }) {
-      const res = await fetch(
-        cursor || "http://localhost:3007/pegawai/daftar?search=",
-        { signal }
-      );
+      const res = await fetch(cursor || API_HOST + "/pegawai/daftar?search=", {
+        signal,
+      });
       let json = await res.json();
 
       return {
@@ -137,13 +136,10 @@ export default function PesananPage() {
   }
 
   async function openTahapModal(id: number) {
-    const response = await fetch(
-      "http://localhost:3007/pesanan/ambil?id=" + id,
-      {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    const response = await fetch(API_HOST + "/pesanan/ambil?id=" + id, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
     if (response.ok) {
       let json = await response.json();
       onOpen();
@@ -164,7 +160,8 @@ export default function PesananPage() {
 
   async function hapusPesanan() {
     const response = await fetch(
-      "http://localhost:3007/pesanan/hapus?id=" +
+      API_HOST +
+        "/pesanan/hapus?id=" +
         deleteId +
         "&oleh=" +
         localStorage.getItem("username"),
@@ -199,7 +196,7 @@ export default function PesananPage() {
       body.penerima_tugas = Number(body.penerima_tugas);
       body.oleh = localStorage.getItem("username");
 
-      const response = await fetch("http://localhost:3007/pesanan/ubah", {
+      const response = await fetch(API_HOST + "/pesanan/ubah", {
         method: "PUT",
         body: JSON.stringify(body),
         headers: { "Content-Type": "application/json" },
@@ -220,7 +217,7 @@ export default function PesananPage() {
       <h3 className={title()}>Pesanan</h3>
       <DataTable
         columns={columns}
-        endpoint="http://localhost:3007/pesanan/daftar?search="
+        endpoint="/pesanan"
         searchKey={"pelanggan.nama"}
         tableRef={tableRef}
         excelExport
