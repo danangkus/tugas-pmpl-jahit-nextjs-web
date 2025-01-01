@@ -182,6 +182,11 @@ export default function LihatPesananPage() {
             <td>{data?.pelanggan.nama}</td>
           </tr>
           <tr>
+            <td>Alamat Pelanggan</td>
+            <td>: </td>
+            <td>{data?.pelanggan.alamat}</td>
+          </tr>
+          <tr>
             <td>Model Pakaian</td>
             <td>: </td>
             <td>{data?.jenis_pakaian.nama}</td>

@@ -5,6 +5,12 @@ export const siteConfig = {
   description: "Make beautiful websites regardless of your design experience.",
   navItems: [
     {
+      label: "Statistik",
+      href: "/admin/statistik",
+      role: ["PEMILIK"],
+      nav: ["BAR", "MENU"],
+    },
+    {
       label: "Pesanan",
       href: "/admin/pesanan",
       role: ["PEGAWAI", "PEMILIK"],

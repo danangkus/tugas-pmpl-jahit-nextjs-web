@@ -51,3 +51,7 @@ After modifying the `.npmrc` file, you need to run `pnpm install` again to ensur
 ## License
 
 Licensed under the [MIT license](https://github.com/nextui-org/next-app-template/blob/main/LICENSE).
+
+## Next Feature
+
+- statistics: pesanan aktif (nomor), pesanan selesai (nomor), total pelanggan (nomor), pesanan deadline terdekat (list), model paling tren berdeasarkan bulan pemesanan (grafik batang), pelanggan pemesanan terbanyak (list), stok bahan paling sedikit (list)

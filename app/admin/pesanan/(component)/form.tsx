@@ -162,19 +162,24 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
 
   function tambahPengukuran() {
     if (pengukuranForm.pengukuran_id && pengukuranForm.nilai) {
-      setDaftarPengukuran([
-        ...daftarPengukuran,
-        {
-          ...pengukuranForm,
-          nilai: Number(pengukuranForm.nilai),
-          pengukuran_id: Number(pengukuranForm.pengukuran_id),
-        },
-      ]);
-      setPengukuranForm({
-        pengukuran_id: "",
-        nilai: "",
-        catatan: "",
-      });
+      let existUkur = daftarPengukuran.filter(
+        (row) => row.pengukuran_id == pengukuranForm.pengukuran_id
+      );
+      if (existUkur.length < 1) {
+        setDaftarPengukuran([
+          ...daftarPengukuran,
+          {
+            ...pengukuranForm,
+            nilai: Number(pengukuranForm.nilai),
+            pengukuran_id: Number(pengukuranForm.pengukuran_id),
+          },
+        ]);
+        setPengukuranForm({
+          pengukuran_id: "",
+          nilai: "",
+          catatan: "",
+        });
+      }
     }
   }
 
@@ -491,14 +496,16 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
                     key={index}
                     endContent={
                       <>
-                        <Button
-                          size="sm"
-                          isIconOnly
-                          color="danger"
-                          onPress={() => hapusBahan(row.bahan_id)}
-                        >
-                          <DeleteIcon size={20} />
-                        </Button>
+                        {row.id == null && (
+                          <Button
+                            size="sm"
+                            isIconOnly
+                            color="danger"
+                            onPress={() => hapusBahan(row.bahan_id)}
+                          >
+                            <DeleteIcon size={20} />
+                          </Button>
+                        )}
                       </>
                     }
                   >
