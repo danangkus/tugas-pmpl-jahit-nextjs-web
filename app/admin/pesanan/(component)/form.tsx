@@ -1,8 +1,14 @@
 "use client";
 
-import { DeleteIcon, EyeIcon, PlusIcon } from "@/components/icons";
+import {
+  DeleteIcon,
+  DownloadIcon,
+  EyeIcon,
+  PlusIcon,
+} from "@/components/icons";
 import { subtitle, title } from "@/components/primitives";
 import { API_HOST } from "@/helpers/envHelpers";
+import { downloadBase64 } from "@/helpers/fileHelpers";
 import { toBase64 } from "@/helpers/valueHelpers";
 import { getLocalTimeZone, parseDate, today } from "@internationalized/date";
 import { Button } from "@nextui-org/button";
@@ -48,6 +54,7 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
         jenis_pakaian_id: Number(values.jenis_pakaian_id),
         dokumen: daftarDokumen,
         pengukuran: daftarPengukuran,
+        bahan: daftarBahan,
         target_tanggal: new Date(values.target_tanggal ?? "").toISOString(),
       };
       onSubmit({ ...values, ...otherValues });
@@ -57,6 +64,7 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
 
   const [daftarDokumen, setDaftarDokumen] = useState<any[]>([]);
   const [daftarPengukuran, setDaftarPengukuran] = useState<any[]>([]);
+  const [daftarBahan, setDaftarBahan] = useState<any[]>([]);
   const [dokumenForm, setDokumenForm] = useState<any>({
     file: null,
     deskripsi: "",
@@ -68,12 +76,20 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
     nilai: "",
     catatan: "",
   });
+  const [bahanForm, setBahanForm] = useState({
+    bahan_id: "",
+    jumlah: "",
+    catatan: "",
+  });
 
   const pelangganList = useAsyncList({
     async load({ signal, cursor }) {
-      const res = await fetch(cursor || API_HOST + "/pelanggan/daftar?search=", {
-        signal,
-      });
+      const res = await fetch(
+        cursor || API_HOST + "/pelanggan/daftar?search=",
+        {
+          signal,
+        }
+      );
       let json = await res.json();
 
       return {
@@ -103,6 +119,20 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
         cursor || API_HOST + "/pengukuran/daftar?search=",
         { signal }
       );
+      let json = await res.json();
+
+      return {
+        items: json.hasil,
+        cursor: json.next,
+      };
+    },
+  });
+
+  const bahanItemList = useAsyncList({
+    async load({ signal, cursor }) {
+      const res = await fetch(cursor || API_HOST + "/bahan/daftar?search=", {
+        signal,
+      });
       let json = await res.json();
 
       return {
@@ -148,8 +178,35 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
     }
   }
 
+  function tambahBahan() {
+    if (bahanForm.bahan_id && bahanForm.jumlah) {
+      setDaftarBahan([
+        ...daftarBahan,
+        {
+          ...bahanForm,
+          jumlah: Number(bahanForm.jumlah),
+          bahan_id: Number(bahanForm.bahan_id),
+        },
+      ]);
+      setBahanForm({
+        bahan_id: "",
+        jumlah: "",
+        catatan: "",
+      });
+    }
+  }
+
   function getPengukuranItemInfo(id: number) {
     let filtered = pengukuranItemList.items.filter((row: any) => row.id == id);
+    let result: any = {};
+    if (filtered.length > 0) {
+      result = filtered[0];
+    }
+    return result;
+  }
+
+  function getBahanItemInfo(id: number) {
+    let filtered = bahanItemList.items.filter((row: any) => row.id == id);
     let result: any = {};
     if (filtered.length > 0) {
       result = filtered[0];
@@ -168,6 +225,10 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
     );
   }
 
+  function hapusBahan(bahan_id: number) {
+    setDaftarBahan(daftarBahan.filter((row) => row.bahan_id != bahan_id));
+  }
+
   async function getDetail(id: string) {
     const response = await fetch(API_HOST + "/pesanan/ambil?id=" + id, {
       method: "GET",
@@ -180,7 +241,12 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
         target_tanggal:
           json.hasil.target_tanggal &&
           parseDate(json.hasil.target_tanggal.split("T")[0]),
+        pelanggan_id: json.hasil.pelanggan_id.toString(),
+        jenis_pakaian_id: json.hasil.jenis_pakaian_id.toString(),
       });
+      setDaftarDokumen(json.hasil.dokumen);
+      setDaftarPengukuran(json.hasil.pengukuran);
+      setDaftarBahan(json.hasil.bahan);
     } else {
       toast("Error!", { type: "error" });
     }
@@ -249,7 +315,7 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
             <DateInput
               label="Target Selesai"
               labelPlacement="outside"
-              minValue={today(getLocalTimeZone())}
+              // minValue={today(getLocalTimeZone())}
               name="target_tanggal"
               onChange={(v) =>
                 handleChange({ target: { name: "target_tanggal", value: v } })
@@ -284,14 +350,19 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
                             <EyeIcon size={20} />
                           </Button>
                         </Tooltip>
-                        {/* <Button size="sm" isIconOnly color="primary">
+                        <Button
+                          size="sm"
+                          isIconOnly
+                          color="primary"
+                          onPress={() => downloadBase64(row.base64, row.nama)}
+                        >
                           <DownloadIcon size={20} />
-                        </Button> */}
+                        </Button>
                         <Button
                           size="sm"
                           isIconOnly
                           color="danger"
-                          onClick={() => hapusDokumen(index)}
+                          onPress={() => hapusDokumen(index)}
                         >
                           <DeleteIcon size={20} />
                         </Button>
@@ -329,7 +400,7 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
                     });
                   }}
                 />
-                <Button isIconOnly color="success" onClick={tambahDokumen}>
+                <Button isIconOnly color="success" onPress={tambahDokumen}>
                   <PlusIcon />
                 </Button>
               </div>
@@ -346,7 +417,7 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
                           size="sm"
                           isIconOnly
                           color="danger"
-                          onClick={() => hapusPengukuran(row.pengukuran_id)}
+                          onPress={() => hapusPengukuran(row.pengukuran_id)}
                         >
                           <DeleteIcon size={20} />
                         </Button>
@@ -405,7 +476,85 @@ export default function PesananForm({ onSubmit, formTitle }: any) {
                     })
                   }
                 />
-                <Button isIconOnly color="success" onClick={tambahPengukuran}>
+                <Button isIconOnly color="success" onPress={tambahPengukuran}>
+                  <PlusIcon />
+                </Button>
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 mb-6 md:mb-0 gap-4">
+            <div className="gap-1">
+              <label className="">Kebutuhan Bahan</label>
+              <Listbox items={daftarBahan} variant="bordered">
+                {daftarBahan.map((row: any, index: number) => (
+                  <ListboxItem
+                    key={index}
+                    endContent={
+                      <>
+                        <Button
+                          size="sm"
+                          isIconOnly
+                          color="danger"
+                          onPress={() => hapusBahan(row.bahan_id)}
+                        >
+                          <DeleteIcon size={20} />
+                        </Button>
+                      </>
+                    }
+                  >
+                    {getBahanItemInfo(row.bahan_id).nama +
+                      " | " +
+                      row.jumlah +
+                      " " +
+                      getBahanItemInfo(row.bahan_id).satuan +
+                      " | " +
+                      row.catatan}
+                  </ListboxItem>
+                ))}
+              </Listbox>
+              <div className="flex w-full flex-nowrap gap-1">
+                <Select
+                  placeholder="Pilih"
+                  labelPlacement="outside"
+                  value={bahanForm.bahan_id}
+                  onChange={(e) =>
+                    setBahanForm({
+                      ...bahanForm,
+                      bahan_id: e.target.value,
+                    })
+                  }
+                  className="justify-start"
+                >
+                  {bahanItemList.items.map((row: any) => (
+                    <SelectItem key={row.id}>
+                      {row.nama + " (" + row.satuan + ")"}
+                    </SelectItem>
+                  ))}
+                </Select>
+                <Input
+                  type="number"
+                  placeholder="Input Jumlah"
+                  labelPlacement="outside"
+                  value={bahanForm.jumlah}
+                  onChange={(e) =>
+                    setBahanForm({
+                      ...bahanForm,
+                      jumlah: e.target.value,
+                    })
+                  }
+                />
+                <Input
+                  placeholder="Input Catatan"
+                  labelPlacement="outside"
+                  value={bahanForm.catatan}
+                  onChange={(e) =>
+                    setBahanForm({
+                      ...bahanForm,
+                      catatan: e.target.value,
+                    })
+                  }
+                />
+                <Button isIconOnly color="success" onPress={tambahBahan}>
                   <PlusIcon />
                 </Button>
               </div>

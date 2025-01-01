@@ -7,56 +7,50 @@ export const siteConfig = {
     {
       label: "Pesanan",
       href: "/admin/pesanan",
+      role: ["PEGAWAI", "PEMILIK"],
+      nav: ["BAR", "MENU"],
     },
     {
       label: "Pelanggan",
       href: "/admin/pelanggan",
+      role: ["PEGAWAI"],
+      nav: ["BAR", "MENU"],
     },
     {
       label: "Model",
       href: "/admin/model",
+      role: ["PEGAWAI"],
+      nav: ["BAR", "MENU"],
     },
     {
       label: "Bahan",
       href: "/admin/bahan",
+      role: ["PEGAWAI"],
+      nav: ["BAR", "MENU"],
     },
     {
       label: "Pegawai",
       href: "/admin/pegawai",
+      role: ["PEMILIK"],
+      nav: ["BAR", "MENU"],
     },
     {
       label: "Pengguna",
       href: "/admin/pengguna",
+      role: ["PEMILIK"],
+      nav: ["BAR", "MENU"],
     },
     {
       label: "Aktivitas",
       href: "/admin/aktivitas",
-    },
-  ],
-  navMenuItems: [
-    {
-      label: "Pesanan",
-      href: "/admin/pesanan",
-    },
-    {
-      label: "Model",
-      href: "/admin/model",
-    },
-    {
-      label: "Pelanggan",
-      href: "/admin/pelanggan",
-    },
-    {
-      label: "Pegawai",
-      href: "/admin/pegawai",
-    },
-    {
-      label: "Aktivitas",
-      href: "/admin/aktivitas",
+      role: ["PEMILIK"],
+      nav: ["BAR", "MENU"],
     },
     {
       label: "Keluar",
       href: "/",
+      role: ["PEGAWAI", "PEMILIK"],
+      nav: ["MENU"],
     },
   ],
   links: {

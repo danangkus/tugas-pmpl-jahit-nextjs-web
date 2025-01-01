@@ -6,6 +6,7 @@ import { button as buttonStyles } from "@nextui-org/theme";
 import { siteConfig } from "@/config/site";
 import { title, subtitle } from "@/components/primitives";
 import { GithubIcon } from "@/components/icons";
+import { Image } from "@nextui-org/image";
 
 export default function Home() {
   return (
@@ -14,12 +15,20 @@ export default function Home() {
         <span className={title()}>Selamat&nbsp;</span>
         <span className={title({ color: "violet" })}>datang&nbsp;</span>
         <br />
-        <span className={title()}>di Sistem Manajemen Jahit</span>
+        <span className={title()}>di Sistem&nbsp;</span>
+        <span className={title({ color: "violet" })}>Manajemen&nbsp;</span>
+        <span className={title()}>Jahit</span>
         {/* <div className={subtitle({ class: "mt-4" })}>
           Beautiful, fast and modern React UI library.
         </div> */}
       </div>
-
+      <Image
+        height={300}
+        // radius="sm"
+        src="/dashboard.png"
+        // width={40}
+        className="mt-10"
+      />
       {/* <div className="flex gap-3">
         <Link
           isExternal

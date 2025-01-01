@@ -175,7 +175,7 @@ export default function BahanForm({ onSubmit, formTitle }: any) {
           </div>
           <div className="flex justify-end mt-5 gap-4">
             {params.get("id") && (
-              <Button onClick={onOpen}>Riwayat Penggunaan</Button>
+              <Button onPress={onOpen}>Riwayat Penggunaan</Button>
             )}
             <Button type="submit" color="primary">
               Simpan

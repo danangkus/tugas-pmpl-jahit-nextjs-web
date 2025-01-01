@@ -30,3 +30,11 @@ export function getGenderDesc(code: string) {
   }
   return result;
 }
+
+export function isEmpty(value: any) {
+  let result = false;
+  if (["", null, undefined].indexOf(value) != -1) {
+    result = true;
+  }
+  return result;
+}

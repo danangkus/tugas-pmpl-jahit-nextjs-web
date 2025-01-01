@@ -23,6 +23,7 @@ export default function AktivitasPage() {
         columns={columns}
         endpoint="/aktivitas"
         searchKey={"aktivitas"}
+        hideCreate={true}
       />
     </div>
   );

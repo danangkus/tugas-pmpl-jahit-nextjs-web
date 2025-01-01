@@ -58,6 +58,21 @@ const bahanColumns = [
   },
 ];
 
+const aktivitasColumns = [
+  {
+    key: "aktivitas",
+    label: "Aktivitas",
+  },
+  {
+    key: "tanggal",
+    label: "Waktu",
+  },
+  {
+    key: "oleh",
+    label: "Oleh",
+  },
+];
+
 const pengukuranColumns = [
   {
     key: "nama",
@@ -126,6 +141,15 @@ export default function LihatPesananPage() {
     }
   }, []);
 
+  const renderCellAktivitas = useCallback((data: any, columnKey: Key) => {
+    const cellValue = data[columnKey as keyof typeof data];
+
+    switch (columnKey) {
+      default:
+        return cellValue;
+    }
+  }, []);
+
   const renderCellPengukuran = useCallback((data: any, columnKey: Key) => {
     const cellValue = data[columnKey as keyof typeof data];
 
@@ -163,7 +187,7 @@ export default function LihatPesananPage() {
             <td>{data?.jenis_pakaian.nama}</td>
           </tr>
           <tr>
-            <td>Tahap Terakhir</td>
+            <td>Tahap</td>
             <td>: </td>
             <td>{data?.tahap_objek.nama}</td>
           </tr>
@@ -207,6 +231,30 @@ export default function LihatPesananPage() {
             </td>
           </tr>
           <tr>
+            <td>Pengukuran</td>
+            <td>: </td>
+            <td>
+              <Table removeWrapper isStriped>
+                <TableHeader columns={pengukuranColumns}>
+                  {(column) => (
+                    <TableColumn key={column.key}>{column.label}</TableColumn>
+                  )}
+                </TableHeader>
+                <TableBody items={data?.pengukuran ?? []}>
+                  {(item: any) => (
+                    <TableRow key={item.id}>
+                      {(columnKey) => (
+                        <TableCell>
+                          {renderCellPengukuran(item, columnKey)}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </td>
+          </tr>
+          <tr>
             <td>Kebutuhan Bahan</td>
             <td>: </td>
             <td>
@@ -231,21 +279,21 @@ export default function LihatPesananPage() {
             </td>
           </tr>
           <tr>
-            <td>Pengukuran</td>
+            <td>Riwayat Aktivitas</td>
             <td>: </td>
             <td>
               <Table removeWrapper isStriped>
-                <TableHeader columns={pengukuranColumns}>
+                <TableHeader columns={aktivitasColumns}>
                   {(column) => (
                     <TableColumn key={column.key}>{column.label}</TableColumn>
                   )}
                 </TableHeader>
-                <TableBody items={data?.pengukuran ?? []}>
+                <TableBody items={data?.aktivitas ?? []}>
                   {(item: any) => (
                     <TableRow key={item.id}>
                       {(columnKey) => (
                         <TableCell>
-                          {renderCellPengukuran(item, columnKey)}
+                          {renderCellAktivitas(item, columnKey)}
                         </TableCell>
                       )}
                     </TableRow>

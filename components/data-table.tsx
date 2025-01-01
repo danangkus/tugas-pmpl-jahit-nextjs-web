@@ -46,9 +46,10 @@ export interface DataTableProps {
   columns: Record<string, any>[];
   endpoint: string;
   searchKey: string;
-  tableRef?: RefObject<DataTableRef>;
+  tableRef?: RefObject<DataTableRef | null>;
   excelExport?: boolean;
   hideDelete?: boolean;
+  hideCreate?: boolean;
 }
 
 export interface DataTableRef {
@@ -62,6 +63,7 @@ export const DataTable: FC<DataTableProps> = ({
   tableRef,
   excelExport,
   hideDelete,
+  hideCreate,
 }) => {
   const [filterValue, setFilterValue] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -242,7 +244,7 @@ export const DataTable: FC<DataTableProps> = ({
                     key={item.key}
                     color={item.key === "hapus" ? "danger" : "default"}
                     className={item.key === "hapus" ? "text-danger" : ""}
-                    onClick={() => item.onClick(data.id)}
+                    onPress={() => item.onClick(data.id)}
                   >
                     {item.label}
                   </DropdownItem>
@@ -296,18 +298,20 @@ export const DataTable: FC<DataTableProps> = ({
               <Button
                 color="success"
                 endContent={<DownloadIcon />}
-                onClick={downloadExcel}
+                onPress={downloadExcel}
               >
                 Export Excel
               </Button>
             )}
-            <Button
-              color="primary"
-              endContent={<PlusIcon />}
-              onClick={onTambah}
-            >
-              Tambah Data
-            </Button>
+            {hideCreate != true && (
+              <Button
+                color="primary"
+                endContent={<PlusIcon />}
+                onPress={onTambah}
+              >
+                Tambah Data
+              </Button>
+            )}
           </div>
         </div>
       </div>

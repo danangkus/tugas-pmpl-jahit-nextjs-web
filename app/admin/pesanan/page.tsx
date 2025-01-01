@@ -6,12 +6,14 @@ import { title } from "@/components/primitives";
 import { API_HOST } from "@/helpers/envHelpers";
 import { Button } from "@nextui-org/button";
 import { Card, CardBody, CardHeader } from "@nextui-org/card";
+import { Chip, ChipProps } from "@nextui-org/chip";
 import {
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
 } from "@nextui-org/dropdown";
+import { Listbox, ListboxItem } from "@nextui-org/listbox";
 import {
   Modal,
   ModalBody,
@@ -24,9 +26,17 @@ import { ScrollShadow } from "@nextui-org/scroll-shadow";
 import { Select, SelectItem } from "@nextui-org/select";
 import { Tab, Tabs } from "@nextui-org/tabs";
 import { usePathname, useRouter } from "next/navigation";
-import { createRef, useState } from "react";
+import { createRef, useMemo, useState } from "react";
 import { useAsyncList } from "react-stately";
 import { toast } from "react-toastify";
+
+const statusColorMap: Record<string, ChipProps["color"]> = {
+  PESAN: "primary",
+  AMBIL: "success",
+  SIAP: "success",
+  BATAL: "danger",
+  PERMAK: "warning",
+};
 
 export default function PesananPage() {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
@@ -39,12 +49,36 @@ export default function PesananPage() {
   const tableRef = createRef<DataTableRef>();
   const [tahapForm, setTahapForm] = useState<any>({
     id: null,
-    tahap: "",
+    tahap: new Set([]),
     penerima_tugas: null,
   });
   const [deleteId, setDeleteId] = useState<number>();
   const router = useRouter();
   const pathname = usePathname();
+
+  const fullActions = [
+    {
+      key: "lihat",
+      label: "Lihat",
+      onClick: (id: any) => toLihatPage(id),
+    },
+    {
+      key: "ubah",
+      label: "Ubah",
+      onClick: (id: any) => toUbahPage(id),
+    },
+    {
+      key: "ubahTahap",
+      label: "Pindah Tahap",
+      onClick: (id: any) => openTahapModal(id),
+    },
+    // {
+    //   key: "hapus",
+    //   label: "Hapus",
+    //   onClick: (id: any) => konfirmasiHapusPesanan(id),
+    //   color: "danger",
+    // },
+  ];
 
   const columns = [
     { key: "id", label: "ID" },
@@ -61,7 +95,16 @@ export default function PesananPage() {
     {
       key: "tahap",
       label: "Tahap",
-      render: (v: BigInt, r: any) => r.tahap_objek.nama,
+      render: (v: string, r: any) => (
+        <Chip
+          className="capitalize"
+          color={statusColorMap[v]}
+          size="sm"
+          variant="flat"
+        >
+          {r.tahap_objek.nama}
+        </Chip>
+      ),
     },
     {
       key: "target_tanggal",
@@ -80,20 +123,17 @@ export default function PesananPage() {
                 <VerticalDotsIcon className="text-default-300" />
               </Button>
             </DropdownTrigger>
-            <DropdownMenu>
-              <DropdownItem onPress={() => toLihatPage(r.id)}>
-                Lihat
-              </DropdownItem>
-              <DropdownItem>Ubah Data</DropdownItem>
-              <DropdownItem onPress={() => openTahapModal(r.id)}>
-                Ubah Tahap
-              </DropdownItem>
-              <DropdownItem
-                color="danger"
-                onPress={() => konfirmasiHapusPesanan(r.id)}
-              >
-                Hapus
-              </DropdownItem>
+            <DropdownMenu items={actionItems}>
+              {(item) => (
+                <DropdownItem
+                  key={item.key}
+                  color={item.key === "hapus" ? "danger" : "default"}
+                  className={item.key === "hapus" ? "text-danger" : ""}
+                  onPress={() => item.onClick(r.id)}
+                >
+                  {item.label}
+                </DropdownItem>
+              )}
             </DropdownMenu>
           </Dropdown>
         </div>
@@ -129,10 +169,36 @@ export default function PesananPage() {
     },
   });
 
+  const role = useMemo(() => {
+    let result: string | null = "";
+    if (localStorage) {
+      result = localStorage.getItem("role");
+    }
+    return result;
+  }, []);
+
+  const actionItems = useMemo(() => {
+    let result = fullActions;
+    result = result.filter((row) => {
+      let rRes = true;
+      if (role == "PEMILIK" && ["ubah", "ubahTahap"].indexOf(row.key) != -1) {
+        rRes = false;
+      }
+      return rRes;
+    });
+    return result;
+  }, [role]);
+
   function toLihatPage(id: number) {
     const params = new URLSearchParams();
     params.set("id", id.toString());
     router.push(`${pathname}/lihat?${params.toString()}`);
+  }
+
+  function toUbahPage(id: number) {
+    const params = new URLSearchParams();
+    params.set("id", id.toString());
+    router.push(`${pathname}/ubah?${params.toString()}`);
   }
 
   async function openTahapModal(id: number) {
@@ -144,8 +210,8 @@ export default function PesananPage() {
       let json = await response.json();
       onOpen();
       setTahapForm({
-        tahap: json.hasil.tahap,
-        penerima_tugas: json.hasil.penerima_tugas.toString(),
+        tahap: new Set([json.hasil.tahap]),
+        penerima_tugas: json.hasil.penerima_tugas?.toString(),
         id,
       });
     } else {
@@ -180,8 +246,10 @@ export default function PesananPage() {
   }
 
   function getSelectedStepDesc() {
+    let iterator = tahapForm.tahap.values();
+    let kode = iterator.next().value;
     let filtered: any[] = tahapList.items.filter(
-      (row: any) => row.kode == tahapForm.tahap
+      (row: any) => row.kode == kode
     );
     let result = "";
     if (filtered.length > 0) {
@@ -192,11 +260,15 @@ export default function PesananPage() {
 
   async function simpanTahap() {
     if (tahapForm.tahap && tahapForm.penerima_tugas) {
-      let body = tahapForm;
-      body.penerima_tugas = Number(body.penerima_tugas);
-      body.oleh = localStorage.getItem("username");
+      let iterator = tahapForm.tahap.values();
+      let body = {
+        ...tahapForm,
+        tahap: iterator.next().value,
+        penerima_tugas: Number(tahapForm.penerima_tugas),
+        oleh: localStorage.getItem("username"),
+      };
 
-      const response = await fetch(API_HOST + "/pesanan/ubah", {
+      const response = await fetch(API_HOST + "/pesanan/ubah-tahap", {
         method: "PUT",
         body: JSON.stringify(body),
         headers: { "Content-Type": "application/json" },
@@ -220,7 +292,8 @@ export default function PesananPage() {
         endpoint="/pesanan"
         searchKey={"pelanggan.nama"}
         tableRef={tableRef}
-        excelExport
+        excelExport={role == "PEMILIK"}
+        hideCreate={role == "PEMILIK"}
       />
       <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
         <ModalContent>
@@ -235,18 +308,28 @@ export default function PesananPage() {
                     className="h-[300px]"
                     style={{ width: "inherit" }}
                   >
-                    <Tabs
-                      isVertical
-                      // size="sm"
-                      selectedKey={tahapForm.tahap}
+                    <Listbox
+                      items={tahapList.items as any[]}
+                      disallowEmptySelection
+                      selectionMode="single"
+                      selectedKeys={tahapForm.tahap}
                       onSelectionChange={(value) => {
                         setTahapForm({ ...tahapForm, tahap: value });
                       }}
                     >
-                      {tahapList.items.map((row: any) => (
-                        <Tab key={row.kode} title={row.nama} />
-                      ))}
-                    </Tabs>
+                      {(item) => (
+                        <ListboxItem
+                          key={item.kode}
+                          color={statusColorMap[item.kode]}
+                          className={
+                            statusColorMap[item.kode] &&
+                            "text-" + statusColorMap[item.kode]
+                          }
+                        >
+                          {item.nama}
+                        </ListboxItem>
+                      )}
+                    </Listbox>
                   </ScrollShadow>
                   <Card style={{ width: "inherit" }}>
                     <CardBody>{getSelectedStepDesc()}</CardBody>

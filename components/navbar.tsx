@@ -33,6 +33,7 @@ import {
 } from "@nextui-org/dropdown";
 import { ToastContainer } from "react-toastify";
 import { useTheme } from "next-themes";
+import { useMemo } from "react";
 
 export const Navbar = () => {
   const { theme, setTheme } = useTheme();
@@ -56,6 +57,26 @@ export const Navbar = () => {
       type="search"
     />
   );
+  const navItems = useMemo(() => {
+    let result: any[] = [];
+    let role = localStorage.getItem("role") ?? "";
+    for (let item of siteConfig.navItems) {
+      if (item.role.includes(role) && item.nav.includes("BAR")) {
+        result.push(item);
+      }
+    }
+    return result;
+  }, [siteConfig.navItems]);
+  const navMenuItems = useMemo(() => {
+    let result: any[] = [];
+    let role = localStorage.getItem("role") ?? "";
+    for (let item of siteConfig.navItems) {
+      if (item.role.includes(role) && item.nav.includes("MENU")) {
+        result.push(item);
+      }
+    }
+    return result;
+  }, [siteConfig.navItems]);
 
   return (
     <NextUINavbar maxWidth="xl" position="sticky">
@@ -70,7 +91,7 @@ export const Navbar = () => {
           </NextLink>
         </NavbarBrand>
         <ul className="hidden md:flex gap-4 justify-start ml-2">
-          {siteConfig.navItems.map((item) => (
+          {navItems.map((item) => (
             <NavbarItem key={item.href}>
               <NextLink
                 className={clsx(
@@ -163,15 +184,13 @@ export const Navbar = () => {
       <NavbarMenu>
         {/* {searchInput} */}
         <div className="mx-4 mt-2 flex flex-col gap-2">
-          {siteConfig.navMenuItems.map((item, index) => (
+          {navMenuItems.map((item, index) => (
             <NavbarMenuItem key={`${item}-${index}`}>
               <Link
                 color={
                   // index === 2
                   //   ? "primary" :
-                  index === siteConfig.navMenuItems.length - 1
-                    ? "danger"
-                    : "foreground"
+                  index === navMenuItems.length - 1 ? "danger" : "foreground"
                 }
                 href={item.href}
                 size="lg"
@@ -182,7 +201,7 @@ export const Navbar = () => {
           ))}
         </div>
       </NavbarMenu>
-      <ToastContainer theme={theme}/>
+      <ToastContainer theme={theme} />
     </NextUINavbar>
   );
 };
